@@ -1,0 +1,112 @@
+---
+title: "Habla!"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+runtime: shiny    
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(DT)
+library(tidyverse)
+library(shiny)
+
+arquivos<- dir(path = "data/")
+
+if (length(arquivos)==0){
+  
+  tabela_texto<<- tibble(datahora= Sys.time(), texto= "Olá traga sua contribuição anônima. Basta escrever.")
+
+  saveRDS(tabela_texto, "data/tabela_texto.rds")
+
+}
+
+tabela_texto <<- readRDS("data/tabela_texto.rds")
+
+source_data <-iris  #tibble(texto="Faça um duplo clique e digite aqui sua contribuição")
+
+
+```
+
+
+
+Inputs {.sidebar data-width="400"}
+=====================================
+
+```{r}
+
+
+actionButton(inputId = "btn_atualiza_conversas",  "Atualiza as conversas", value= FALSE)
+
+tags$br()
+
+
+textInput(inputId = "texto", label= "Digite sua contribuição",  value = "", width = "100%")
+
+actionButton(inputId = "btn_salva_contribuicao",  "Salva contribuição", value= FALSE)
+
+div(id= "atualiza", checkboxInput(inputId = "atualiza_conversa",  "Busca dados mais atualizados", value= FALSE), style = "display:none;") 
+
+div(id= "atualiza", checkboxInput(inputId = "salva_conversa",  "Salva dados", value= FALSE), style = "display:none;") 
+
+
+observeEvent(input$btn_atualiza_conversas,{
+  updateCheckboxInput(session, "atualiza_conversa", value = TRUE)
+})
+
+
+observeEvent(input$btn_salva_contribuicao,{
+
+ readRDS("data/tabela_texto.rds") %>%
+ bind_rows(
+   tibble(datahora= Sys.time(), texto= input$texto)
+ ) %>%
+  saveRDS("data/tabela_texto.rds")
+ 
+  updateCheckboxInput(session, "atualiza_conversa", value = TRUE)
+})
+
+
+
+
+```
+
+
+Tabela de contribuições
+=====================================  
+
+
+
+Column
+-----------------------------------------------------------------------
+
+### O que já foi dito
+
+```{r}
+
+renderDT({
+  
+  if (input$atualiza_conversa){
+    tabela_texto <<- readRDS("data/tabela_texto.rds")
+  }
+  
+  DT::datatable(tabela_texto,
+                extensions = 'Buttons',
+      options = list(
+        ordering=TRUE,
+        paging=TRUE,
+        searching= TRUE,
+        info = TRUE,
+        pageLength = NROW(tabela_texto),
+        dom = 'Bfrtip',
+        buttons = c('copy',"csv","excel")
+      ))
+  
+})
+
+
+
+```
+

@@ -1,0 +1,12 @@
+name: habla
+title: habla
+username: fabdev
+account: fabdev
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 15873764
+bundleId: 11087377
+url: https://fabdev.shinyapps.io/habla/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
